@@ -44,7 +44,9 @@ const logic signed [11:0] blank_lvl = 12'd1536;
 
 // the target range of video data is between 10% and 75% of the positive
 // output range, so 65% of the original amplitude
-assign cvbs_inv_pre = scale_and_invert * cvbs;
+always_ff @(posedge clk_in) begin
+    cvbs_inv_pre <= scale_and_invert * cvbs;
+end
 assign cvbs_inv = cvbs_inv_pre[18:7];
 assign cvbs_out_pre = 13'(cvbs_inv) + 13'(blank_lvl);
 assign cvbs_out = cvbs_out_pre[11:0]; // FIXME broken resize if pre exceeds 12 bits
