@@ -1,0 +1,21 @@
+# Makefile
+
+# defaults
+SIM ?= verilator
+TOPLEVEL_LANG ?= verilog
+#EXTRA_ARGS += --no-std-waiver
+EXTRA_ARGS += --trace --trace-structs --trace-fst
+#EXTRA_ARGS += --trace --trace-structs
+
+VERILOG_SOURCES += $(PWD)/../hdl/cvbs_to_sdr.sv
+# use VHDL_SOURCES for VHDL files
+
+# COCOTB_TOPLEVEL is the name of the toplevel module in your Verilog or VHDL file
+COCOTB_TOPLEVEL = cvbs_to_sdr
+
+# COCOTB_TEST_MODULES is the basename of the Python test file(s)
+COCOTB_TEST_MODULES = test_cvbs_to_sdr
+
+# include cocotb's make rules to take care of the simulator setup
+include $(shell cocotb-config --makefiles)/Makefile.sim
+
