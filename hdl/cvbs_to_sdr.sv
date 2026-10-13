@@ -1,3 +1,9 @@
+// Copyright (c) 2026 Michael Büchler
+// All Rights Reserved.
+//
+// TODO: figure out how to license this. CERN-OHL-W-2.0 seems a bit
+// complicated with the requirement to document changes.
+
 // initial: no VSB, just copy the signal to both I and Q
 // better: apply a VSB filter, making the data complex
 // amazing: take in audio data, add an audio carrier

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Michael Büchler
+# SPDX-License-Identifier: MIT
+
 import cocotb
 from cocotb.triggers import RisingEdge
 from cocotb.clock import Clock
