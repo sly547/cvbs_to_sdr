@@ -26,6 +26,7 @@ module cvbs_to_sdr
     input logic vsync,
     input logic hblank,
     input logic hsync,
+    input logic colorburst,
     input logic signed [12-1:0] cvbs,
 
     output logic data_valid,
@@ -69,6 +70,8 @@ assign cvbs_out = cvbs_out_pre[11:0]; // FIXME clip max to 12 bits
 always_comb begin
     if (vsync || hsync)
         data_out = sync_lvl;
+    else if (colorburst)
+        data_out = cvbs_out;
     else if (vblank || hblank)
         data_out = blank_lvl;
     else
