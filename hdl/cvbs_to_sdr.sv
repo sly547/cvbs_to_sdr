@@ -33,29 +33,38 @@ module cvbs_to_sdr
     output logic signed [N-1:0] data_out_q
 );
 
+localparam int SCALE_WL = 8;
+localparam int CVBS_WL = 12;
+
+typedef logic signed [SCALE_WL-1:0] scale_inv_t;
+typedef logic signed [SCALE_WL+CVBS_WL-1:0] product_t;
+typedef logic signed [CVBS_WL-1:0] cvbs_t;
+typedef logic signed [CVBS_WL:0] cvbs_sum_t;
+
 // Q0.7 for -0.65
-const logic signed [7:0] scale_and_invert = -8'd83;
+//const logic signed [7:0] scale_and_invert = -8'sd83;
+const scale_inv_t scale_and_invert = scale_inv_t'(-83);
 // Q11.0 * Q0.7 = Q11.7 (stored as 20 bits because both inputs have a sign bit)
-logic signed [19:0] cvbs_inv_pre;
+product_t cvbs_inv_pre;
 // Q11.0
-logic signed [11:0] cvbs_inv;
-logic signed [12:0] cvbs_out_pre;
-logic signed [11:0] cvbs_out;
-logic signed [11:0] data_out;
+cvbs_t cvbs_inv;
+cvbs_sum_t cvbs_out_pre;
+cvbs_t cvbs_out;
+cvbs_t data_out;
 
 logic [1:0] ctr;
 
-const logic signed [11:0] sync_lvl = {1'b0, {11{1'b1}}}; // complicated way of saying 2**11-1
-const logic signed [11:0] blank_lvl = 12'd1536;
+const cvbs_t sync_lvl = {1'b0, {11{1'b1}}}; // complicated way of saying 2**11-1
+const cvbs_t blank_lvl = cvbs_t'(1536);
 
 // the target range of video data is between 10% and 75% of the positive
 // output range, so 65% of the original amplitude
 always_ff @(posedge clk_in) begin
     cvbs_inv_pre <= scale_and_invert * cvbs;
 end
-assign cvbs_inv = cvbs_inv_pre[18:7];
-assign cvbs_out_pre = 13'(cvbs_inv) + 13'(blank_lvl);
-assign cvbs_out = cvbs_out_pre[11:0]; // FIXME broken resize if pre exceeds 12 bits
+assign cvbs_inv = cvbs_inv_pre[18:SCALE_WL-1];
+assign cvbs_out_pre = cvbs_sum_t'(cvbs_inv) + cvbs_sum_t'(blank_lvl);
+assign cvbs_out = cvbs_out_pre[11:0]; // FIXME clip max to 12 bits
 
 always_comb begin
     if (vsync || hsync)
