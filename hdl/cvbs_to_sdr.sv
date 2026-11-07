@@ -53,6 +53,8 @@ cvbs_sum_t cvbs_out_pre;
 cvbs_t cvbs_out;
 cvbs_t data_out;
 
+logic hsync_q, hblank_q, vsync_q, vblank_q, colorburst_q;
+
 logic [1:0] ctr;
 
 const cvbs_t sync_lvl = {1'b0, {11{1'b1}}}; // complicated way of saying 2**11-1
@@ -89,12 +91,20 @@ always_comb begin
     end
 end
 
+always_ff @(posedge clk_in) begin
+    hsync_q  <= hsync;
+    hblank_q <= hblank;
+    vsync_q  <= vsync;
+    vblank_q <= vblank;
+    colorburst_q <= colorburst;
+end
+
 always_comb begin
-    if (vsync || hsync)
+    if (vsync_q || hsync_q)
         data_out = sync_lvl;
-    else if (colorburst)
+    else if (colorburst_q)
         data_out = cvbs_out;
-    else if (vblank || hblank)
+    else if (vblank_q || hblank_q)
         data_out = blank_lvl;
     else
         data_out = cvbs_out;
