@@ -63,13 +63,14 @@ const cvbs_t blank_lvl = cvbs_t'(1536);
 always_ff @(posedge clk_in) begin
     cvbs_inv_pre <= scale_and_invert * cvbs;
 end
+// throw out 7 bits because the scaling factor is Q0.7
 assign cvbs_inv = cvbs_inv_pre[18:SCALE_WL-1];
 assign cvbs_out_pre = cvbs_sum_t'(cvbs_inv) + cvbs_sum_t'(blank_lvl);
 
 always_comb begin
     // negative sign: should not be possible!
     if (cvbs_out_pre[CVBS_WL]) begin
-        if (cvbs_out_pre[CVBS_WL-1:CVBS_WL-2] != 2'b11) begin
+        if (cvbs_out_pre[CVBS_WL-1] != 1'b1) begin
             cvbs_out = {1'b1, {(CVBS_WL-1){1'b0}}}; // negative max
         end
         else begin
@@ -77,7 +78,7 @@ always_comb begin
         end
     // positive sign
     end else begin
-        if (cvbs_out_pre[CVBS_WL-1:CVBS_WL-2] != 2'b00) begin
+        if (cvbs_out_pre[CVBS_WL-1] != 1'b0) begin
             // should never happen unless the color carrier exceeds the
             // sync level
             cvbs_out = {1'b0, {(CVBS_WL-1){1'b1}}}; // positive max
